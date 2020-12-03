@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 using Dicom.Imaging.Mathematics;
 using Dicom.IO.Buffer;
+using DICOM.Shared.IO.Reader;
 
 namespace Dicom.IO.Reader
 {
@@ -298,7 +299,8 @@ namespace Dicom.IO.Reader
             {
                 var compressed = source.GetStream();
 
-                var decompressed = new MemoryStream();
+                //var decompressed = new MemoryStream();
+                var decompressed = new MemoryTributary();
                 using (var decompressor = new DeflateStream(compressed, CompressionMode.Decompress, true))
                 {
                     decompressor.CopyTo(decompressed);

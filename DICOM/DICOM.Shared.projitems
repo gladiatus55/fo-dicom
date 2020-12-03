@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DicomDataException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DicomDataset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DicomDatasetExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DicomDatasetMock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DicomDatasetWalker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DicomDateRange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DicomDictionary.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IO\Reader\DicomReaderMultiObserver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\Reader\IDicomReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\Reader\IDicomReaderObserver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\Reader\MemoryTributary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\StreamByteSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\StreamByteTarget.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\TemporaryFile.cs" />

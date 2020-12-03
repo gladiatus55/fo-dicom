@@ -1,8 +1,11 @@
 ﻿// Copyright (c) 2012-2020 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
+using dicom;
 using Dicom.Helpers;
+using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Dicom
@@ -241,7 +244,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
         public void DicomValidation_ValidateDA()
         {
             var ds =
-                new DicomDataset(
+                new DicomDatasetMock(
                     new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
                     new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
 
@@ -270,7 +273,7 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
         public void DicomValidation_ValidateDT()
         {
             var ds =
-                new DicomDataset(
+                new DicomDatasetMock(
                     new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
                     new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
 
@@ -339,6 +342,164 @@ Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lo
             Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ScheduledProcedureStepStartDateTime, "20193010-20193110"));
             Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ScheduledProcedureStepStartDateTime, "2019-0100-2020-0100-202002-0100"));
             Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ScheduledProcedureStepStartDateTime, $"20081-200812{zone}"));
+        }
+
+
+        [Fact]
+        public void DicomValidation_ValidateIS()
+        {
+            // Integer String
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+            ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "");
+            ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "10");
+            ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "10 ");
+
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "abc"));
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "1 0"));
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "1-0"));
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ReferencedFrameNumber, "12300283828189237809128312838677812649724"));
+        }
+
+
+        [Fact]
+        public void DicomValidation_ValidateLT()
+        {
+            // Long Text
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+            ds.AddOrUpdate(DicomTag.PulserNotes, "");
+            ds.AddOrUpdate(DicomTag.PulserNotes, "Note");
+
+            int maxLength = 10240;
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            string bigString = new string(Enumerable.Range(1, maxLength).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+
+            ds.AddOrUpdate(DicomTag.PulserNotes, bigString);
+
+            // Max is 10240
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.PulserNotes, bigString + "A"));
+        }
+
+        [Fact]
+        public void DicomValidation_ValidateST()
+        {
+            // Short Text
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+            int maxLength = 1024;
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            string bigString = new string(Enumerable.Range(1, maxLength).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+
+            ds.AddOrUpdate(DicomTag.InstitutionAddress, bigString);
+
+            // Max is 1024
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.InstitutionAddress, bigString + "A"));
+        }
+
+
+        [Fact]
+        public void DicomValidation_ValidateUI()
+        {
+            // UID
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+
+            string goodUID = "25326.718.62637.281936.21836.1263.628.40919.74.213123.5.123123.5";
+
+            // Test 64 byte uid
+            ds.AddOrUpdate(DicomTag.SOPClassUID, goodUID);
+
+            // Test with characters
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.SOPClassUID, Guid.NewGuid().ToString()));
+
+            // Max is 64bytes
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.SOPClassUID, goodUID + "9"));
+
+            // Allowed only numbers and .
+            string uid = goodUID.Substring(1);
+            uid += "A";
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.SOPClassUID, uid));
+        }
+
+        [Fact]
+        public void DicomValidation_ValidateSH()
+        {
+            // Short String
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+            int maxLength = 16;
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            string shortString = new string(Enumerable.Range(1, maxLength).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+
+            // Test empty
+            ds.AddOrUpdate(DicomTag.ImplementationVersionName, "");
+
+            // Test 16 byte string
+            ds.AddOrUpdate(DicomTag.ImplementationVersionName, shortString);
+
+            shortString.Substring(1);
+            // Test 15 byte string
+            ds.AddOrUpdate(DicomTag.ImplementationVersionName, shortString);
+
+            // Add ESC
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ImplementationVersionName, shortString + '\u001b'));
+
+            // Too long string
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ImplementationVersionName, shortString + "AB"));
+
+        }
+
+        [Fact]
+        public void DicomValidation_ValidateCS()
+        {
+            // Code String
+            var ds =
+                new DicomDatasetMock(
+                    new DicomUniqueIdentifier(DicomTag.SOPClassUID, DicomUID.SecondaryCaptureImageStorage),
+                    new DicomUniqueIdentifier(DicomTag.SOPInstanceUID, "1.2.3"));
+
+            int maxLength = 16;
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            Random random = new Random();
+            string shortString = new string(Enumerable.Range(1, maxLength).Select(_ => chars[random.Next(chars.Length)]).ToArray());
+
+            // Test empty
+            ds.AddOrUpdate(DicomTag.ConversionType, "");
+
+            // Test 16 byte string
+            ds.AddOrUpdate(DicomTag.ConversionType, shortString);
+
+            shortString.Substring(1);
+            // Test 15 byte string
+            ds.AddOrUpdate(DicomTag.ConversionType, shortString);
+
+            // Only uppercase character, digits, space and underscore are allowed
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ConversionType, shortString + 'b'));
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ConversionType, shortString + '-'));
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ConversionType, shortString + '\\'));
+
+            // Too long string
+            Assert.Throws<DicomValidationException>(() => ds.AddOrUpdate(DicomTag.ConversionType, shortString + "AB"));
+
         }
         #endregion
 
