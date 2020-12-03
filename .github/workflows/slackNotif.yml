@@ -3,15 +3,16 @@ name: slack-notification
 on: [pull_request, issues]
 
 jobs:
-  slack-notification:
+  slack-notifications:
     runs-on: ubuntu-20.04
-    name: Send-Slack-Message
+    name: Sends a message to Slack when a push, a pull request or an issue is made
     steps:
       - name: Send message to Slack API
-        uses: archive/github-actions-slack@v1.1.0
+        uses: archive/github-actions-slack@v1.0.3
+        id: notify
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: ess-devops
-          slack-text: Hello! Event *${{ github.event_name }}* in *${{ github.repository }}*
+          slack-text: Hello! Event "${{ github.event_name }}" in "${{ github.repository }}" 🤓
       - name: Result from "Send Message"
         run: echo "The result was ${{ steps.notify.outputs.slack-result }}"
