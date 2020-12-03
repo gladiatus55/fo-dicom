@@ -1,4 +1,5 @@
 #### v.4.0.7 (TBD)
+Test
 * Bug fix: Not able to open deflated dicom file which contains squence (#1097)
 * Bug fix: DS VR type value ending with \0 fails to serialize in JsonDicomConverter (#1078)
 * Allow disabling validation in JsonDicomConverter
