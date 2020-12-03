@@ -1,6 +1,8 @@
 name: SlackNotifications
 
 on:
+  issues:
+    branches: [ development ]
   pull_request:
     branches: [ development ]
 
@@ -10,13 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Slack Message
-      env:
-        SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      uses: hbfernandes/slack-action@1.0
-      with:
-        args: |
-          {
-          "channel": "ess-devops",
-          "text": "testing slack messaging"
-          }
+      - name: Send mail
+        uses: timheuer/issue-notifier@v1
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        with:
+          fromMailAddress: 'martinko.nguyen@gmail.com'
+          toMailAddress: 'martinko.nguyen@gmail.com'
+          subject: 'A new issue was labeled'
+          labelsToMonitor: 'breaking-change,major-bug'
