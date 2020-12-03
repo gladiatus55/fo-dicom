@@ -1,5 +1,5 @@
 #### 5.0.0
-
+tst
 ##### Changes:
 
 * There is only one library built in NetStandard 2.0 *fo-dicom.core*.*
