@@ -15,4 +15,8 @@ jobs:
         SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: hbfernandes/slack-action@1.0
       with:
-        args: '{\"channel\":\"ess-devops\",\"text\":\"Hello\"}'
+        args: |
+          {
+          "channel": "ess-devops",
+          "text": "testing slack messaging"
+          }
