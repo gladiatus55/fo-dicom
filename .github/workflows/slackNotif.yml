@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify slack
+    - name: Post Slack messages
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      uses: pullreminders/slack-action@master
+      uses: abinoda/slack-action@04243c2cbb59fefa48fe0ea8f273ea6ac6dac075
       with:
         args: '{\"channel\":\"C01G4GGEEF5\",\"Text\":\"Hello\"}'
