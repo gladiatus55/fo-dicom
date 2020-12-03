@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify slack
+    - name: Slack Message
       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      uses: abinoda/slack-action@04243c2cbb59fefa48fe0ea8f273ea6ac6dac075
+        SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: hbfernandes/slack-action@1.0
       with:
-        args: '{\"channel\":\"C01G4GGEEF5\",\"Text\":\"Hello\"}'
+        args: '{\"channel\":\"ess-devops\",\"text\":\"Hello\"}'
